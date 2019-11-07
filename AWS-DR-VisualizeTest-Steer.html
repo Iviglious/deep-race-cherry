@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<table>
+    <tr>
+        <td rowspan="2">
+            <canvas id="mainCanvas" width="1000px" height="800px" style="border:1px solid #d3d3d3;">
+                Your browser does not support the HTML5 canvas tag.</canvas>
+        </td>
+        <td>
+            <div style="width:50px;height:300px;background-color: gray;"
+            onmousemove="MoveMouseTrack(event)">Move mouse here to rotate track.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div style="width:50px;height:300px;background-color: gray;"
+            onmousemove="MoveMouseCar(event)">Move mouse here to rotate car.</div>
+        </td>
+    </tr>
+</table>
+
+<script>
+// Define Constants
+const CanvasMaxWidth = 1000;
+const CanvasMaxHeight = 800;
+
+// Get Canvas
+var c = document.getElementById("mainCanvas");
+var ctx = c.getContext("2d");
+// Set general canvas settings
+ctx.font = "14px Tahoma";
+
+// Set variables
+var MouseT = 0;
+var MouseC = 0;
+var Track_Angle = 0;
+var Car_Angle = 0;
+
+// Define functions
+function rgb(r,g,b)
+{
+    // Check values
+    if (r > 255 || r < 0) r = 0;
+    if (g > 255 || g < 0) g = 0;
+    if (b > 255 || b < 0) b = 0;
+
+    // Convert to HEX
+    var rs = Math.round(r).toString(16);
+    var gs = Math.round(g).toString(16);
+    var bs = Math.round(b).toString(16);
+
+    return "#"+(rs.length<2?"0"+rs:rs)+(gs.length<2?"0"+gs:gs)+(bs.length<2?"0"+bs:bs);
+}
+
+function DrawSector(x, y, s, f)
+{
+    // Decide the colour
+    var gcol = Math.round(f); // from 0 to 510 (red -> yellow -> green)
+    var rcol = 255; // by default max 255
+    if (gcol > 255)
+    {
+        rcol = 510 - gcol;
+        gcol = 255;
+        if (rcol > 255) rcol=255;
+    }
+    ctx.fillStyle = rgb(rcol, gcol, 0);
+    ctx.fillRect(x-s/2.0, y-s/2.0, s, s);
+    ctx.strokeStyle = rgb(0,0,0); // black
+    ctx.strokeText(f.toString(), x-s/3, y+s/8);
+}
+
+function DrawLine(ax,ay,bx,by, r,g,b)
+{
+    ctx.beginPath();
+    ctx.moveTo(ax,ay);
+    ctx.lineTo(bx,by);
+    ctx.strokeStyle = rgb(r,g,b);
+    ctx.stroke();
+}
+
+function DrawTrack(x,y,angle, f)
+{
+    var Track_Length = 300;
+    var Track_Width = 200;
+
+    var deg = angle*Math.PI/180.0;
+    var lx = Track_Length*Math.cos(deg);
+    var ly = Track_Length*Math.sin(deg);
+    var wx = Track_Width*Math.sin(deg);
+    var wy = Track_Width*Math.cos(deg);
+
+    DrawLine(x+wx-lx, y+wy+ly, x+wx+lx, y+wy-ly, 255,0,0);
+    DrawLine(x-wx-lx, y-wy+ly, x-wx+lx, y-wy-ly, 0,0,255);
+    DrawSector(x+wx+lx, y+wy-ly,50,f);
+    DrawSector(x-wx+lx, y-wy-ly,50,angle);
+
+}
+
+function DrawCar(x,y,angle,f)
+{
+    var Car_Length = 150;
+
+    var deg = angle*Math.PI/180.0;
+    var rx = Car_Length*Math.cos(deg);
+    var ry = Car_Length*Math.sin(deg);
+
+    DrawLine(x-rx,y-ry,x+rx,y+ry, 0,0,255);
+    DrawSector(x-rx,y-ry,60,f);
+    DrawSector(x+rx,y+ry,45,angle);
+}
+
+function MoveMouseTrack(event)
+{
+    var Step = 5;
+    // Check mouse move
+    if (MouseT < event.clientY)
+    {
+        Track_Angle += Step;
+        MouseT = event.clientY;
+    }
+    else if (MouseT > event.clientY)
+    {
+        Track_Angle -= Step;
+        MouseT = event.clientY;
+    }
+
+    // Check angles
+    if (Track_Angle > 180) Track_Angle = -180;
+    if (Track_Angle < -180) Track_Angle = 180;
+
+    Draw();
+}
+
+function MoveMouseCar(event)
+{
+    var Step = 5;
+    // Check mouse move
+    if (MouseC < event.clientY)
+    {
+        Car_Angle += Step;
+        MouseC = event.clientY;
+    }
+    else if (MouseC > event.clientY)
+    {
+        Car_Angle -= Step;
+        MouseC = event.clientY;
+    }
+
+    // Check angles
+    if (Car_Angle > 180) Car_Angle = -180;
+    if (Car_Angle < -180) Car_Angle = 180;
+
+    Draw();
+}
+
+
+function Draw()
+{
+    try
+    {
+
+        // Calculate difference angle (-180 -> +180)
+        var Diff_Angle = Math.round(Track_Angle - Car_Angle);
+
+        // Calculate reward
+        var Reward = Math.round(510 - Math.abs(Diff_Angle)*510/180);
+
+        // Clear canvas
+        ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+
+        DrawTrack(CanvasMaxWidth/2,CanvasMaxHeight/2,Track_Angle,Reward);
+        DrawCar(CanvasMaxWidth/2,CanvasMaxHeight/2,Car_Angle,Reward);
+
+    }
+    catch(Ex)
+    {
+        alert("Exception: " + Ex);
+    }
+}
+
+// First call
+Draw();
+
+</script>
+
+</body>
+</html>
