@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AWS Deep Race - Plot Reward function</title>
+    </head>
+<body>
+
+    <canvas id="mainCanvas" width="1200px" height="800px" style="border:1px solid #d3d3d3;">
+        Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+// Define Constants
+const CanvasMaxWidth = 1200;
+const CanvasMaxHeight = 800;
+const CentreX = 800;
+const CentreY = 100;
+
+// Get Canvas
+var c = document.getElementById("mainCanvas");
+var ctx = c.getContext("2d");
+// Set general canvas settings
+ctx.font = "14px Tahoma";
+
+// Set variables
+
+// Define functions
+function rgb(r,g,b)
+{
+    // Check values
+    if (r > 255 || r < 0) r = 0;
+    if (g > 255 || g < 0) g = 0;
+    if (b > 255 || b < 0) b = 0;
+
+    // Convert to HEX
+    var rs = Math.round(r).toString(16);
+    var gs = Math.round(g).toString(16);
+    var bs = Math.round(b).toString(16);
+
+    return "#"+(rs.length<2?"0"+rs:rs)+(gs.length<2?"0"+gs:gs)+(bs.length<2?"0"+bs:bs);
+}
+
+function DrawLine(ax,ay,bx,by, r,g,b)
+{
+    ctx.beginPath();
+    ctx.moveTo(ax,ay);
+    ctx.lineTo(bx,by);
+    ctx.strokeStyle = rgb(r,g,b);
+    ctx.stroke();
+}
+
+function DrawAxises()
+{
+    // X - Axis
+    DrawLine(CentreX, CanvasMaxHeight - CanvasMaxHeight-10, CentreX, CanvasMaxHeight - 10, 0,0,0);
+    // Y - Axis
+    DrawLine(10, CanvasMaxHeight - CentreY, CanvasMaxWidth-10, CanvasMaxHeight - CentreY, 0,0,0);
+}
+
+
+function Calculate_Reward(angle)
+{
+    //return Math.round(510 - Math.abs(angle)*510/180);
+    
+    //var r = Math.abs(Math.cos(Math.PI*angle/180.0));
+    //var f = (r<0.7?0.01:r*3-2);
+
+    var aa = Math.abs(angle);
+    if (aa > 315) aa = 360 - aa;
+    var f = (aa > 45? 0.01: Math.cos(Math.PI*aa/180.0) * 3.0 - 2.0);
+    return Math.round(f*510);
+}
+
+
+function Draw()
+{
+    try
+    {
+
+        DrawAxises();
+
+        var prev_angle = -360;
+        var step = 15;
+        var prev_reward = Calculate_Reward(prev_angle);
+
+        for(var angle=prev_angle+step;angle<=0;angle+=step)
+        {
+            var reward = Calculate_Reward(angle);
+            var x = CentreX + prev_angle;
+            var y = CanvasMaxHeight - CentreY - prev_reward;
+            DrawLine(x, y, CentreX + angle, CanvasMaxHeight - CentreY - reward, 255,0,0);
+            ctx.strokeText(prev_angle.toString() + ", " + prev_reward.toString(), x, y);
+
+            prev_angle = angle;
+            prev_reward = reward;
+        }
+
+    }
+    catch(Ex)
+    {
+        alert("Exception: " + Ex);
+    }
+}
+
+// First call
+Draw();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="mainCanvas" width="800" height="600" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+// Define Constants
+const SectorSize = 5;
+const CanvasMaxWidth = 800;
+const CanvasMaxHeight = 600;
+
+// Get Canvas
+var c = document.getElementById("mainCanvas");
+var ctx = c.getContext("2d");
+
+// Define functions
+function rgb(r,g,b)
+{
+    var rs = r.toString(16);
+    var gs = g.toString(16);
+    var bs = b.toString(16);
+    return "#"+(rs.length<2?"0"+rs:rs)+(gs.length<2?"0"+gs:gs)+(bs.length<2?"0"+bs:bs);
+}
+
+function DrawSector(x, y, f)
+{
+    // Decide the colour
+    var gcol = Math.round(f); // from 0 to 255
+    var rcol = 255; // by default max 255
+    if (gcol > 255)
+    {
+        rcol = 510 - gcol;
+        gcol = 255;
+        if (rcol > 255) rcol=255;
+    }
+    ctx.fillStyle = rgb(rcol, gcol, 0);
+    ctx.fillRect(x-SectorSize/2.0, y-SectorSize/2.0, SectorSize, SectorSize);
+    //ctx.strokeText(f.toString(), x+SectorSize/2-7, y+SectorSize/2+3);
+}
+
+function DrawLine(ax,ay,bx,by, r,g,b)
+{
+    ctx.beginPath();
+    ctx.moveTo(ax,ay);
+    ctx.lineTo(bx,by);
+    ctx.strokeStyle = rgb(r,g,b);
+    ctx.stroke();
+}
+
+function DrawScenario(px,py,nx,ny)
+{
+    // Do the calculations before drawing
+    var track_angle = 180.0 * Math.atan2(ny - py, nx - px) / Math.PI;
+    
+    // Convert xy to display coordinates
+    ppx = px;
+    pnx = nx;
+    ppy = CanvasMaxHeight - py;
+    pny = CanvasMaxHeight - ny;
+
+    // Draw main line
+    DrawSector(ppx,ppy,0);
+    DrawSector(pnx,pny,0);
+    DrawLine(ppx,ppy, pnx,pny, 0,0,0);
+    ctx.strokeText(track_angle.toString(), pnx+5, pny);
+
+    // Draw core
+    var radius = 50;
+    for(var ang=180; ang>-180; ang-=45)
+    {
+        var deg = ang*Math.PI/180.0;
+        var rx = radius*Math.cos(deg);
+        var ry = radius*Math.sin(deg);
+
+        nx = px+rx;
+        ny = py+ry;
+        var car_angle = Math.round(180.0 * Math.atan2(ny - py, nx - px) / Math.PI);
+        var diff_angle = Math.round(track_angle - car_angle);
+        
+        if (track_angle > 90)
+        {
+            car_angle = Math.round(180.0 * Math.atan2(ny - py, px - nx) / Math.PI);
+            diff_angle = Math.round(180 - track_angle - car_angle);
+            //cor = 0;
+        }
+        else if (track_angle < -90)
+        {
+            car_angle = Math.round(180.0 * Math.atan2(ny - py, px - nx) / Math.PI);
+            diff_angle = Math.round(-180 - track_angle - car_angle);
+            //cor = 200;
+        }
+        var cor = Math.abs(diff_angle);
+
+        DrawLine(ppx,ppy, nx, CanvasMaxHeight - ny, 0,100,cor);
+        //ctx.strokeText(car_angle.toString() + "," + diff_angle.toString(), nx+5, CanvasMaxHeight - ny);
+        ctx.strokeText(diff_angle.toString(), nx+5, CanvasMaxHeight - ny);
+    }
+}
+
+try
+{
+
+    DrawScenario(70,70, 170,70);
+    DrawScenario(170,210, 70,210);
+    DrawScenario(70,350, 70,450);
+    DrawScenario(210,450, 210,350);
+
+    DrawScenario(370,70, 470,170);
+    DrawScenario(470,310, 370,210);
+    DrawScenario(470,450, 370,550);
+    DrawScenario(610,450, 710,350);
+    
+
+    // Draw core
+    var radius = 50;
+    var px = 650, py = 70;
+    for(var ang=180; ang>-180; ang-=45)
+    {
+        var deg = ang*Math.PI/180.0;
+        var rx = radius*Math.cos(deg);
+        var ry = radius*Math.sin(deg);
+
+        var nx = px+rx;
+        var ny = py+ry;
+
+        //var mod_angle = ang;
+        //if (mod_angle > 90)
+        //    mod_angle = 180 - mod_angle;
+        //else if (mod_angle < -90)
+        //    mod_angle = -180 - mod_angle;
+
+        var mod_angle = Math.round(180.0 * Math.atan2(ny - py, px - nx) / Math.PI);
+        //var diff_angle = Math.round(Math.abs(track_angle) - Math.abs(car_angle));
+        //var diff_angle = Math.round(track_angle - car_angle);
+
+        DrawLine(px,CanvasMaxHeight - py, nx,CanvasMaxHeight - ny, 200,0,0);
+        ctx.strokeText(mod_angle.toString(), nx+5, CanvasMaxHeight - ny);
+    }
+
+}
+catch(Ex)
+{
+    alert("Exception: " + Ex);
+}
+
+
+</script>
+
+</body>
+</html>
