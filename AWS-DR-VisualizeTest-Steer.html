@@ -103,14 +103,17 @@ function DrawTrack(x,y,angle, f)
     var Track_Width = 200;
 
     var deg = angle*Math.PI/180.0;
-    var lx = Track_Length*Math.cos(deg);
-    var ly = Track_Length*Math.sin(deg);
-    var wx = Track_Width*Math.sin(deg);
-    var wy = Track_Width*Math.cos(deg);
+    var lx = Track_Length*Math.cos(-deg);
+    var ly = Track_Length*Math.sin(-deg);
+    var wx = Track_Width*Math.sin(-deg);
+    var wy = Track_Width*Math.cos(-deg);
 
+    
+    
     DrawLine(x-wx-lx, y+wy-ly, x-wx+lx, y+wy+ly, 255,0,0);
     DrawLine(x+wx-lx, y-wy-ly, x+wx+lx, y-wy+ly, 0,0,255);
-    //DrawRewardSector(x-wx+lx, y+wy+ly,50,f);
+    
+      //DrawRewardSector(x-wx+lx, y+wy+ly,50,f);
     DrawAngleSector(x+wx+lx, y-wy+ly,50,angle);
 
 }
@@ -122,14 +125,15 @@ function DrawCar(x,y,angle, f)
     var Car_Width = 100;
 
     var deg = angle*Math.PI/180.0;
-    var lx = Car_Length*Math.cos(deg);
-    var ly = Car_Length*Math.sin(deg);
-    var wx = Car_Width*Math.sin(deg);
-    var wy = Car_Width*Math.cos(deg);
+    var lx = Car_Length*Math.cos(-deg);
+    var ly = Car_Length*Math.sin(-deg);
+    var wx = Car_Width*Math.sin(-deg);
+    var wy = Car_Width*Math.cos(-deg);
 
     DrawLine(x-wx-lx, y+wy-ly, x-wx+lx, y+wy+ly, 255,0,0);
     DrawLine(x+wx-lx, y-wy-ly, x+wx+lx, y-wy+ly, 0,0,255);
-    //DrawRewardSector(x-wx+lx, y+wy+ly,50,f);
+
+      //DrawRewardSector(x-wx+lx, y+wy+ly,50,f);
     DrawAngleSector(x+wx+lx, y-wy+ly,50,angle);
 
 }
@@ -140,8 +144,8 @@ function DrawWheel(x,y,car_angle, wheel_angle, f)
 
     var angle = car_angle + wheel_angle;
     var deg = angle*Math.PI/180.0;
-    var rx = Wheel_Length*Math.cos(deg);
-    var ry = Wheel_Length*Math.sin(deg);
+    var rx = Wheel_Length*Math.cos(-deg);
+    var ry = Wheel_Length*Math.sin(-deg);
 
     DrawLine(x-rx,y-ry,x+rx,y+ry, 0,0,255);
     DrawRewardSector(x-rx,y-ry,60,f);
